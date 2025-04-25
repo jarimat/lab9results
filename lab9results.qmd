@@ -1,0 +1,160 @@
+---
+title: "Lab 9 - Final Project Results"
+subtitle: "Ecosystem Science and Sustainability 330"
+author: Jake Matullo and Jessica Magalit
+format: html
+execute: 
+  echo: true
+---
+
+```{r}
+library(tidyverse)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(janitor) #have to install package first
+library(ggplot2)
+library(dataRetrieval)
+library(grwat)  #have to install package first
+library(lubridate)
+```
+
+**Stream Flow Measurements** 
+
+```{r}
+staney_discharge <-  readNWISdv(siteNumber = "15081497",
+                            parameterCd = "00060") %>%
+  select(Date, Staney_Discharge = X_00060_00003)
+```
+```{r}
+hatchery_discharge <- readNWISdv(siteNumber = "15086225",
+                            parameterCd = "00060") %>%
+  select(Date, Hatchery_Discharge = X_00060_00003)
+```
+```{r}
+filtered_staneydischarge <- staney_discharge %>%
+  filter(Date >= as.Date("2016-10-26") & Date <= as.Date("2025-04-23"))
+```
+
+```{r}
+discharge <- full_join(filtered_staneydischarge, hatchery_discharge, by = "Date") %>%
+  select(where(~ !all(is.na(.))))
+```
+
+```{r}
+ggplot(discharge, aes(x = Date)) +
+  geom_line(aes(y = Hatchery_Discharge, color = "Hatchery Streamflow"), size = 1.2) +
+  geom_line(aes(y = Staney_Discharge, color = "Staney Streamflow"), size = 1.2) +
+  labs(title = "Hatchery Creek and Staney Creek Daily Streamflow",
+       y = "Cubic Feet per Second",
+       color = "Variable") +
+  theme_minimal()
+```
+Below is another chart of the same data, shortened to a one-year timespan for clarity:
+
+```{r}
+ggplot(discharge, aes(x = Date)) +
+  geom_line(aes(y = Hatchery_Discharge, color = "Hatchery Streamflow"), linewidth = 1) +
+  geom_line(aes(y = Staney_Discharge, color = "Staney Streamflow"), linewidth = 1) +
+  scale_x_date(limits = c(ymd(20220101), ymd(20230101))) +
+  labs(title = "Hatchery Creek and Staney Creek Daily Streamflow",
+       y = "Cubic Feet per Second",
+       color = "Variable") +
+  theme_minimal()  
+```
+
+
+**Stream Flow Flashiness**
+
+```{r}
+staney_baseflow = staney_discharge %>% 
+  mutate(Staney_Baseflow = gr_baseflow(Staney_Discharge, method = 'jakeman')) %>%
+  filter(Date >= as.Date("2016-10-26") & Date <= as.Date("2025-04-23"))
+```
+
+Below is a plot of the flow type for Staney Creek, shortened to a one-year timespan for clarity:
+
+```{r}
+ggplot(staney_baseflow) +
+  geom_area(aes(Date, Staney_Discharge, fill = "Discharge"), color = 'black') +
+  geom_area(aes(Date, Staney_Baseflow, fill = "Baseflow"), color = 'black') +
+  scale_fill_manual(values = c("Discharge" = "steelblue", "Baseflow" = "orangered")) +
+  scale_x_date(limits = c(ymd(20220101), ymd(20230101)))
+  theme_minimal() +
+  labs(fill = "Flow Type")
+```
+```{r}
+hatchery_baseflow <- hatchery_discharge %>% 
+  mutate(Hatchery_Baseflow = gr_baseflow(Hatchery_Discharge, method = 'jakeman')) %>%
+  filter(Date >= as.Date("2016-10-26") & Date <= as.Date("2025-04-23"))
+```
+
+Below is a plot of the flow type for Hatchery Creek, shortened to a one-year timespan for clarity:
+
+```{r}
+ggplot(hatchery_baseflow) +
+  geom_area(aes(Date, Hatchery_Discharge, fill = "Discharge"), color = 'black') +
+  geom_area(aes(Date, Hatchery_Baseflow, fill = "Baseflow"), color = 'black') +
+  scale_fill_manual(values = c("Discharge" = "steelblue", "Baseflow" = "orangered")) +
+  scale_x_date(limits = c(ymd(20220101), ymd(20230101)))
+  theme_minimal() +
+  labs(fill = "Flow Type")
+```
+As we can see, the difference between the baseflow and overall discharge for Hatchery Creek is much less than the difference in baseflow and overall discharge for Staney Creek. This is partially due to the spikes in discharge Staney Creek experiences, which is a result of its high flashiness. The high flashiness could itself likely be a result of the deforestation the watershed experienced, meaning that the soil had less living roots to absorb high amounts of rainfall. A lot of that rainfall - more than otherwise - then entered the creek, resulting in these quick spikes in flow.
+
+**Stream Temperature**
+
+```{r}
+staney_temp <- readNWISdv(siteNumber = "15081497",    # Download data from USGS for site 06752260
+                          parameterCd = "00010") %>%
+  select(Date, Staney_Temperature = X_00010_00003)
+```
+
+```{r}
+filtered_staneytemp <- staney_temp %>%
+  filter(Date >= as.Date("2017-04-25") & Date <= as.Date("2025-04-23"))
+```
+
+
+```{r}
+hatchery_temp <- readNWISdv(siteNumber = "15086225",
+                            parameterCd = "00010") %>%
+  select(Date, Hatchery_Temperature = X_00010_00003)
+```
+
+```{r}
+filtered_hatcherytemp <- hatchery_temp %>%
+  filter(Date >= as.Date("2017-04-25") & Date <= as.Date("2025-04-23"))
+```
+
+```{r}
+stream_temps <- full_join(filtered_hatcherytemp, filtered_staneytemp, by = "Date") %>%
+  arrange(Date) %>%
+  
+```
+
+```{r}
+ggplot(stream_temps, aes(x = Date)) +
+  geom_line(aes(y = Hatchery_Temperature, color = "Hatchery Water Temperature"), size = 1.2) +
+  geom_line(aes(y = Staney_Temperature, color = "Staney Water Temperature"), size = 1.2) +
+  labs(title = "Hatchery Creek and Staney Creek Water Temperature",
+       y = "degrees Celsius",
+       color = "Variable") +
+  theme_minimal()
+```
+**Discussion**
+Our results show clear differences between Staney Creek (the disturbed site) and Hatchery Creek (the undisturbed site), especially in terms of streamflow. Staney Creek has higher and more variable streamflow, which likely reflects the long-term effects of deforestation in the area. When forests are cleared, there’s often less vegetation and living root networks to absorb rainwater, which can lead to more surface runoff and bigger spikes in streamflow during storms. This pattern suggests that the disturbed watershed responds more intensely to precipitation, which could increase erosion and make habitats less stable.
+
+When it comes to water temperature, both creeks show similar seasonal trends, with temperatures rising in the summer and falling in the winter. However, Staney Creek sometimes has slightly cooler summer temperatures, which was surprising. Disturbed areas usually have warmer water because there’s less shade from trees. This difference might be explained by factors like stream depth, groundwater input, or forest regrowth providing some shade.
+
+These findings suggest that even decades after logging, deforestation continues to affect how a watershed functions. Streamflow patterns especially seem to be shaped by past disturbances, which is important to understand when making decisions about land and forest management.
+
+**Limitations**
+One limitation of our analysis is that we only used daily data, which may miss short-term changes like sudden, hourslong spikes during heavy rain. We also didn’t include land cover or precipitation data, which could help explain some of the streamflow differences more clearly.
+
+**Broader Implications**
+This project shows how data science tools can help us understand environmental change. By using public data and tidyverse packages in R, we were able to explore long-term trends in two different creeks. These kinds of analyses are valuable for conservation efforts and for understanding how ecosystems recover after human disturbances.
+
+**Next Steps**
+Future work could bring in data on rainfall, vegetation, or biodiversity to see how streamflow changes affect wildlife and forest recovery. Looking at things like sediment levels or fish populations could also give us a better idea of how these watersheds are doing overall.
+

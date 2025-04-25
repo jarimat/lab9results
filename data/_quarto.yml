@@ -1,0 +1,7 @@
+project:
+  title: "Lab 9 - Final Project Results"
+  output-dir: docs
+  type: website
+format:
+  html:
+    self-contained: true
