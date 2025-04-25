@@ -129,8 +129,7 @@ filtered_hatcherytemp <- hatchery_temp %>%
 
 ```{r}
 stream_temps <- full_join(filtered_hatcherytemp, filtered_staneytemp, by = "Date") %>%
-  arrange(Date) %>%
-  
+  arrange(Date)
 ```
 
 ```{r}
