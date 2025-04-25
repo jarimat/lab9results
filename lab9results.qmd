@@ -2,7 +2,6 @@
 title: "Lab 9 - Final Project Results"
 subtitle: "Ecosystem Science and Sustainability 330"
 author: Jake Matullo and Jessica Magalit
-format: html
 execute: 
   echo: true
 ---
