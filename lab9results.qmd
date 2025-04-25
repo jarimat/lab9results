@@ -152,7 +152,7 @@ These findings suggest that even decades after logging, deforestation continues 
 One limitation of our analysis is that we only used daily data, which may miss short-term changes like sudden, hourslong spikes during heavy rain. We also didn’t include land cover or precipitation data, which could help explain some of the streamflow differences more clearly.
 
 **Broader Implications**
-This project shows how data science tools can help us understand environmental change. By using public data and tidyverse packages in R, we were able to explore long-term trends in two different creeks. These kinds of analyses are valuable for conservation efforts and for understanding how ecosystems recover after human disturbances.
+This project shows how various data science tools can help us understand environmental change. By using public data and tidyverse packages in R, we were able to explore long-term trends in two different creeks. These kinds of analyses are valuable for conservation efforts and for understanding how ecosystems recover after human disturbances.
 
 **Next Steps**
 Future work could bring in data on rainfall, vegetation, or biodiversity to see how streamflow changes affect wildlife and forest recovery. Looking at things like sediment levels or fish populations could also give us a better idea of how these watersheds are doing overall.
